@@ -1,0 +1,93 @@
+const product_grid = document.querySelector('.js-products-grid')
+let displayProduct = ``
+
+products.forEach(product => {
+    displayProduct += `
+        <div class="product-container">
+        <div class="product-image-container">
+            <img class="product-image"
+            src="${product.image}">
+        </div>
+
+        <div class="product-name limit-text-to-2-lines">
+            ${product.name}
+        </div>
+
+        <div class="product-rating-container">
+            <img class="product-rating-stars"
+            src="images/ratings/rating-45.png">
+            <div class="product-rating-count link-primary">
+            ${product.rating.count}
+            </div>
+        </div>
+
+        <div class="product-price">
+            ${(product.price_cents / 100).toFixed(2)}
+        </div>
+
+        <div class="product-quantity-container">
+            <select class="item-quantity-${product.id}">
+            <option selected value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            </select>
+        </div>
+
+        <div class="product-spacer"></div>
+
+        <div class="added-to-cart js-added-to-cart-${product.id}">
+            <img src="images/icons/checkmark.png">
+            Added
+        </div>
+
+        <button class="add-to-cart-button button-primary js-add-to-cart" data-product-id="${product.id}">
+            Add to Cart
+        </button>
+        </div>
+    `
+    product_grid.innerHTML = displayProduct
+});
+
+document.querySelectorAll('.js-add-to-cart').forEach(button => {
+    button.addEventListener('click', e => {
+        const productID = button.dataset.productId;
+        const productQuantity = document.querySelector(`.item-quantity-${productID}`).value
+
+        // 1. FIX: Use .find() to locate the matching item object inside the cart array
+        const matchingItem = cart.find(item => item.id === productID);
+
+        // 2. FIX: Check if we actually found a matching item
+        if (matchingItem) {
+            // Update the quantity property of THAT SPECIFIC matching item object
+            matchingItem.quantity += 1;
+        } else {
+            // 3. FIX: Only push a brand-new object if it wasn't found in the cart yet
+            cart.push({
+                productID: productID,
+                quantity: Number(productQuantity)
+            });
+        }
+
+        let total_cartquantity = 0
+        cart.forEach(c => {
+            total_cartquantity += c.quantity
+        })
+
+        document.querySelector('.cart-quantity').textContent = total_cartquantity
+        const message = document.querySelector(`.js-added-to-cart-${productID}`)
+
+        if(message) {
+            setTimeout(() => {
+                message.style.opacity = 1
+            }, 500)
+            message.style.opacity = 0
+        } 
+    });
+});
