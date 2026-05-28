@@ -1,4 +1,4 @@
-import { cart } from '../data/cart.js'
+import * as myCart from '../data/cart.js'
 import { products } from '../data/products.js';
 
 const product_grid = document.querySelector('.js-products-grid')
@@ -8,11 +8,11 @@ products.forEach(product => {
     displayProduct += `
         <div class="product-container">
         <div class="product-image-container">
-            <img class="product-image"
+            <img class="product-image js-product-image-${product.id}"
             src="${product.image}">
         </div>
 
-        <div class="product-name limit-text-to-2-lines">
+        <div class="product-name limit-text-to-2-lines js-product-name-${product.id}">
             ${product.name}
         </div>
 
@@ -24,8 +24,8 @@ products.forEach(product => {
             </div>
         </div>
 
-        <div class="product-price">
-            ${(product.price_cents / 100).toFixed(2)}
+        <div class="product-price-${product.id}">
+            ${product.priceCents}
         </div>
 
         <div class="product-quantity-container">
@@ -61,36 +61,19 @@ products.forEach(product => {
 document.querySelectorAll('.js-add-to-cart').forEach(button => {
     button.addEventListener('click', e => {
         const productID = button.dataset.productId;
-        const productQuantity = document.querySelector(`.item-quantity-${productID}`).value
 
-        // 1. FIX: Use .find() to locate the matching item object inside the cart array
-        const matchingItem = cart.find(item => item.id === productID);
-
-        // 2. FIX: Check if we actually found a matching item
-        if (matchingItem) {
-            // Update the quantity property of THAT SPECIFIC matching item object
-            matchingItem.quantity += 1;
-        } else {
-            // 3. FIX: Only push a brand-new object if it wasn't found in the cart yet
-            cart.push({
-                productID: productID,
-                quantity: Number(productQuantity)
-            });
+        const cart_products = {
+            productID: productID,
+            productQuantity : Number(document.querySelector(`.item-quantity-${productID}`).value),
+            productPrice : Number(document.querySelector(`.product-price-${productID}`).innerText),
+            productImage : document.querySelector(`.js-product-image-${productID}`).src,
+            productName : document.querySelector(`.js-product-name-${productID}`).innerText,
         }
 
-        let total_cartquantity = 0
-        cart.forEach(c => {
-            total_cartquantity += c.quantity
-        })
-
-        document.querySelector('.cart-quantity').textContent = total_cartquantity
-        const message = document.querySelector(`.js-added-to-cart-${productID}`)
-
-        if(message) {
-            setTimeout(() => {
-                message.style.opacity = 1
-            }, 500)
-            message.style.opacity = 0
-        } 
+        myCart.addToCart(cart_products)
+        myCart.showAddedNotif(productID)
+        document.querySelector('.cart-quantity').textContent = myCart.updateCartQuantity()
     });
 });
+
+document.querySelector('.cart-quantity').textContent = myCart.updateCartQuantity()
