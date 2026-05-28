@@ -1,3 +1,5 @@
+import {cart} from '../data/cart.js'
+
 const product_grid = document.querySelector('.js-products-grid')
 let displayProduct = ``
 
