@@ -1,4 +1,4 @@
-export const cart = JSON.parse(localStorage.getItem('Cart')) || []
+export let cart = JSON.parse(localStorage.getItem('Cart')) || []
 
 export function addToCart(cart_products) {
      // 1. FIX: Use .find() to locate the matching item object inside the cart array
@@ -17,12 +17,22 @@ export function addToCart(cart_products) {
         console.log(cart);
 }
 
+export function deleteCart(productId) {
+  const newCart = [];
+  cart.forEach((item) => {
+    if (item.productID !== productId) {
+      newCart.push(item);
+    }
+  });
+  cart = newCart;
+  localStorage.setItem('Cart', JSON.stringify(cart));
+}
+
 export function updateCartQuantity() {
     let total_cartquantity = 0
         cart.forEach(c => {
             total_cartquantity += c.productQuantity
         })
-    
     return total_cartquantity
 }
 

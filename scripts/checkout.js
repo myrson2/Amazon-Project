@@ -1,12 +1,15 @@
-import { cart } from '../data/cart.js'
-import { display_payment } from './payment.js';
+import { cart, deleteCart, updateCartQuantity } from '../data/cart.js'
+import * as payment from './payment.js';
 
-console.log(cart);
+function renderOrderSummary() {
+  document.querySelector('.js-cart-items').textContent = updateCartQuantity();
 
-const order_summary = document.querySelector('.order-summary')
-let display_cart = ``
+  const order_summary = document.querySelector('.order-summary')
+  if (!order_summary) return;
 
-cart.forEach(cart_item => {
+  let display_cart = ``
+
+  cart.forEach(cart_item => {
     display_cart += `
         <div class="cart-item-container">
             <div class="delivery-date">
@@ -21,13 +24,13 @@ cart.forEach(cart_item => {
                   ${cart_item.productName}
                 </div>
                 <div class="product-price">
-                  $${(cart_item.productPrice/100).toFixed(2)}
+                  $${(cart_item.productPrice / 100).toFixed(2)}
                 </div>
-                <div class="product-quantity">
+                <div class="product-quantity" data-product-id="${cart_item.productID}">
                   <span>
                     Quantity: <span class="quantity-label">${cart_item.productQuantity}</span>
                   </span>
-                  <span class="update-quantity-link link-primary">
+                  <span class="update-quantity-link link-primary" >
                     Update
                   </span>
                   <span class="delete-quantity-link link-primary">
@@ -47,7 +50,7 @@ cart.forEach(cart_item => {
                     class="delivery-option-input"
                     name="delivery-option-${cart_item.productID}">
                   <div>
-                    <div class="delivery-option-date">
+                    <div class="delivery-option-date" data-shipping-date="tuesday">
                       Tuesday, June 21
                     </div>
                     <div class="delivery-option-price">
@@ -61,7 +64,7 @@ cart.forEach(cart_item => {
                     class="delivery-option-input"
                     name="delivery-option-${cart_item.productID}">
                   <div>
-                    <div class="delivery-option-date">
+                    <div class="delivery-option-date" data-shipping-date="wednesday">
                       Wednesday, June 15
                     </div>
                     <div class="delivery-option-price">
@@ -74,7 +77,7 @@ cart.forEach(cart_item => {
                     class="delivery-option-input"
                     name="delivery-option-${cart_item.productID}">
                   <div>
-                    <div class="delivery-option-date">
+                    <div class="delivery-option-date" data-shipping-date="monday">
                       Monday, June 13
                     </div>
                     <div class="delivery-option-price">
@@ -86,27 +89,61 @@ cart.forEach(cart_item => {
             </div>
           </div>
     `
+  });
+
+  function getShippingDate(shipping) {
+    switch (shipping) {
+      case 'tuesday':
+        return Number(0);
+        break;
+      case 'wednesday':
+        return Number(499);
+        break;
+      case 'monday':
+        return Number(999);
+        break;
+      default:
+        return NaN
+        break;
+    }
+    return 0;
+  }
+
+  order_summary.innerHTML = display_cart
+
+  // Render the payment summary FIRST so that the shipping elements exist in the DOM
+  document.querySelector('.payment-summary').innerHTML = payment.display_payment
+
+  document.querySelectorAll('.cart-item-container').forEach(container => {
+    container.querySelectorAll('.delivery-option').forEach(options => {
+      const input = options.querySelector('.delivery-option-input')
+      input.addEventListener('change', e => {
+        if (input.checked) {
+          const dateText = options.querySelector('.delivery-option-date').innerText.trim()
+          const dateShipping = options.querySelector('.delivery-option-date').dataset.shippingDate
+          // Note: This still only calculates for ONE item. 
+          // In a full build, you should sum all selected shipping options.
+          payment.calculatePrices(getShippingDate(dateShipping))
+          container.querySelector('.delivery-date').innerText = 'Delivery date: ' + dateText
+        }
+      })
+
+      if (input.checked) {
+        const defaultDate = options.querySelector('.delivery-option-date').innerText.trim()
+        const dateShipping = options.querySelector('.delivery-option-date').dataset.shippingDate
+        payment.calculatePrices(getShippingDate(dateShipping))
+        container.querySelector('.delivery-date').innerText = 'Delivery date: ' + defaultDate
+      }
+    })
+  })
+}
+
+document.querySelector('.order-summary').addEventListener('click', (e) => {
+  if (e.target.classList.contains('delete-quantity-link')) {
+    const productId = e.target.closest('.product-quantity').dataset.productId;
+    deleteCart(productId);
+    renderOrderSummary();
+  }
 });
 
-order_summary.innerHTML = display_cart
-
-document.querySelectorAll('.cart-item-container').forEach(container => {
-    
-    container.querySelectorAll('.delivery-option').forEach(options => {
-        const input = options.querySelector('.delivery-option-input')
-
-        input.addEventListener('change', e => {
-            if(input.checked) {
-                const dateText = options.querySelector('.delivery-option-date').innerText.trim();
-                container.querySelector('.delivery-date').innerText = 'Delivery date: ' + dateText;
-            }
-        })
-
-         if(input.checked) {
-            const defaultDate = options.querySelector('.delivery-option-date').innerText.trim();
-            container.querySelector('.delivery-date').innerText = 'Delivery date: ' + defaultDate;
-        }
-    })
-})
-
-document.querySelector('.payment-summary').innerHTML = display_payment
+renderOrderSummary();
