@@ -141,7 +141,7 @@ function renderOrderSummary() {
 document.querySelector('.order-summary').addEventListener('click', (e) => {
   if (e.target.classList.contains('delete-quantity-link')) {
     const productId = e.target.closest('.product-quantity').dataset.productId;
-    deleteCart(productId);
+    // deleteCart(productId);
     renderOrderSummary();
   }
 });
