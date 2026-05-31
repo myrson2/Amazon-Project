@@ -1,39 +1,40 @@
 import * as cartItems from "../data/cart.js";
 
-function cartPrice(){
+export const deliveryOptions = [
+  { days: 'tuesday', priceCents: 0 },    // FREE
+  { days: 'wednesday', priceCents: 499 },  // $4.99
+  { days: 'monday', priceCents: 999 }   // $9.99
+];
+
+export function renderFeeSummary() {
+  function cartPrice(){
     let price = 0
     cartItems.cart.forEach((cartItem) => {
         price += cartItem.productQuantity * cartItem.productPrice;
     });
     return price;
-}
+  }
 
-export const calculatePrices = (shippingDay) => {
-  console.log(shippingDay);
-  const shippingElement = document.querySelector('.js-added-shipping');
-  shippingElement.textContent = `$${(shippingDay / 100).toFixed(2)}`; 
-  document.querySelector('.js-before-tax').textContent =`$${(beforeTax(shippingDay)/100).toFixed(2)}`
-  document.querySelector('.js-calculate-tax').textContent =`$${(calculateTax(shippingDay)/100).toFixed(2)}`
-  document.querySelector('.js-total-order').textContent =`$${(totalOrder(shippingDay)/100).toFixed(2)}`
-}
+  const calculateShippingFee = () => {
+    let totalShippingFee = 0;
+    cartItems.cart.forEach(cart_items => {
+      const matchedOption = deliveryOptions.find(
+        option => option.days === cart_items.shippingDay
+      );
+      if (matchedOption) {
+        totalShippingFee += matchedOption.priceCents;
+      }
+    })
+    return totalShippingFee
+  }
 
-const beforeTax = (shippingDay) => {
-  return cartPrice() + Number(shippingDay);
-} 
+  const shippingFeeCents = calculateShippingFee();
+  const totalBeforeTaxCents = cartPrice() + shippingFeeCents;
+  const taxCents = Math.round(totalBeforeTaxCents * 0.1);
+  const totalCents = totalBeforeTaxCents + taxCents;
 
-const calculateTax = (shippingDay) => {
-  console.log('before tax:' + beforeTax(shippingDay));
-  return (beforeTax(shippingDay) * 10) / 100
-}
-
-const totalOrder = (shippingDay) => {
-  return beforeTax(shippingDay) + calculateTax(shippingDay)
-}
-
-// const afterTax = beforeTax(shippingDay) 
-
-export let display_payment = `
-     <div class="payment-summary-title">
+  const display_payment = `
+          <div class="payment-summary-title">
             Order Summary
           </div>
 
@@ -44,26 +45,28 @@ export let display_payment = `
 
           <div class="payment-summary-row">
             <div>Shipping &amp; handling:</div>
-            <div class="payment-summary-money js-added-shipping"></div>
+            <div class="payment-summary-money js-added-shipping">$${(shippingFeeCents / 100).toFixed(2)}</div>
           </div>
 
           <div class="payment-summary-row subtotal-row">
             <div>Total before tax:</div>
-            <div class="payment-summary-money js-before-tax"></div>
+            <div class="payment-summary-money js-before-tax">$${(totalBeforeTaxCents / 100).toFixed(2)}</div>
           </div>
 
           <div class="payment-summary-row">
             <div data-tax="10">Estimated tax (10%):</div>
-            <div class="payment-summary-money js-calculate-tax"></div>
+            <div class="payment-summary-money js-calculate-tax">$${(taxCents / 100).toFixed(2)}</div>
           </div>
 
           <div class="payment-summary-row total-row">
             <div>Order total:</div>
-            <div class="payment-summary-money js-total-order"></div>
+            <div class="payment-summary-money js-total-order">$${(totalCents / 100).toFixed(2)}</div>
           </div>
 
           <button class="place-order-button button-primary">
             Place your order
           </button>
-        </div>
-`
+  `;
+
+  document.querySelector('.payment-summary').innerHTML = display_payment;
+}

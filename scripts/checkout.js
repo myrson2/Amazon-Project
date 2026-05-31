@@ -11,7 +11,7 @@ function renderOrderSummary() {
 
   cart.forEach(cart_item => {
     display_cart += `
-        <div class="cart-item-container">
+        <div class="cart-item-container" data-cart-id="${cart_item.productID}">
             <div class="delivery-date">
             </div>
 
@@ -111,19 +111,25 @@ function renderOrderSummary() {
 
   order_summary.innerHTML = display_cart
 
-  // Render the payment summary FIRST so that the shipping elements exist in the DOM
-  document.querySelector('.payment-summary').innerHTML = payment.display_payment
+  // Render the payment summary to ensure values are calculated and displayed
+  payment.renderFeeSummary();
 
   document.querySelectorAll('.cart-item-container').forEach(container => {
+    const cartId = container.dataset.cartId
+
     container.querySelectorAll('.delivery-option').forEach(options => {
       const input = options.querySelector('.delivery-option-input')
+
+      const updateShippingFee = cart.find(({productID}) => productID === cartId)
+      
       input.addEventListener('change', e => {
         if (input.checked) {
+          console.log(updateShippingFee);
           const dateText = options.querySelector('.delivery-option-date').innerText.trim()
           const dateShipping = options.querySelector('.delivery-option-date').dataset.shippingDate
-          // Note: This still only calculates for ONE item. 
-          // In a full build, you should sum all selected shipping options.
-          payment.calculatePrices(getShippingDate(dateShipping))
+
+          updateShippingFee.shippingDay = dateShipping;
+          payment.renderFeeSummary();
           container.querySelector('.delivery-date').innerText = 'Delivery date: ' + dateText
         }
       })
@@ -131,7 +137,7 @@ function renderOrderSummary() {
       if (input.checked) {
         const defaultDate = options.querySelector('.delivery-option-date').innerText.trim()
         const dateShipping = options.querySelector('.delivery-option-date').dataset.shippingDate
-        payment.calculatePrices(getShippingDate(dateShipping))
+        updateShippingFee.shippingDay = dateShipping;
         container.querySelector('.delivery-date').innerText = 'Delivery date: ' + defaultDate
       }
     })
@@ -141,7 +147,7 @@ function renderOrderSummary() {
 document.querySelector('.order-summary').addEventListener('click', (e) => {
   if (e.target.classList.contains('delete-quantity-link')) {
     const productId = e.target.closest('.product-quantity').dataset.productId;
-    // deleteCart(productId);
+    deleteCart(productId);
     renderOrderSummary();
   }
 });

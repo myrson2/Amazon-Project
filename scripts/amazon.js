@@ -67,7 +67,8 @@ document.querySelectorAll('.js-add-to-cart').forEach(button => {
             productQuantity : Number(document.querySelector(`.item-quantity-${productID}`).value),
             productPrice : Number(document.querySelector(`.product-price-${productID}`).innerText),
             productImage : document.querySelector(`.js-product-image-${productID}`).src,
-            productName : document.querySelector(`.js-product-name-${productID}`).innerText
+            productName : document.querySelector(`.js-product-name-${productID}`).innerText,
+            shippingDay: 'tuesday'
         }
 
         myCart.addToCart(cart_products)
