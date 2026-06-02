@@ -1,5 +1,9 @@
 export let cart = JSON.parse(localStorage.getItem('Cart')) || []
 
+function saveStorage() {
+    localStorage.setItem('Cart', JSON.stringify(cart));
+}
+
 export function addToCart(cart_products) {
      // 1. FIX: Use .find() to locate the matching item object inside the cart array
         const matchingItem = cart.find(item => item.productID === cart_products.productID);
@@ -12,8 +16,7 @@ export function addToCart(cart_products) {
             // 3. FIX: Only push a brand-new object if it wasn't found in the cart yet
             cart.push(cart_products)
         }
-        
-        localStorage.setItem('Cart', JSON.stringify(cart));
+        saveStorage()
         console.log(cart);
 }
 
@@ -25,7 +28,7 @@ export function deleteCart(productId) {
     }
   });
   cart = newCart;
-  localStorage.setItem('Cart', JSON.stringify(cart));
+  saveStorage()
 }
 
 export function updateCartQuantity() {
@@ -34,14 +37,4 @@ export function updateCartQuantity() {
             total_cartquantity += c.productQuantity
         })
     return total_cartquantity
-}
-
-export function showAddedNotif(productID) {
-    const message = document.querySelector(`.js-added-to-cart-${productID}`)
-        if(message) {
-            setTimeout(() => {
-                message.style.opacity = 1
-            }, 500)
-            message.style.opacity = 0
-        } 
 }

@@ -1,10 +1,5 @@
 import * as cartItems from "../data/cart.js";
-
-export const deliveryOptions = [
-  { days: 'tuesday', priceCents: 0 },    // FREE
-  { days: 'wednesday', priceCents: 499 },  // $4.99
-  { days: 'monday', priceCents: 999 }   // $9.99
-];
+import { deliveryOptions } from "../data/deliveryOptions.js"; 
 
 export function renderFeeSummary() {
   function cartPrice(){
