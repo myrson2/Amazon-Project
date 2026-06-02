@@ -1,5 +1,6 @@
 import { cart, deleteCart, updateCartQuantity } from '../data/cart.js'
 import * as payment from './payment.js';
+import { deliveryOptions  } from '../data/deliveryOptions.js';
 
 function renderOrderSummary() {
   document.querySelector('.js-cart-items').textContent = updateCartQuantity();
@@ -90,24 +91,6 @@ function renderOrderSummary() {
           </div>
     `
   });
-
-  function getShippingDate(shipping) {
-    switch (shipping) {
-      case 'tuesday':
-        return Number(0);
-        break;
-      case 'wednesday':
-        return Number(499);
-        break;
-      case 'monday':
-        return Number(999);
-        break;
-      default:
-        return NaN
-        break;
-    }
-    return 0;
-  }
 
   order_summary.innerHTML = display_cart
 
