@@ -28,12 +28,7 @@ export function deleteCart(productId) {
     }
   });
   cart = newCart;
-  saveStorage()
-}
-
-export function deleteAllCart() {
-   cart = []
-   saveStorage()
+  localStorage.setItem('Cart', JSON.stringify(cart));
 }
 
 export function updateCartQuantity() {
