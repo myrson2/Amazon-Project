@@ -2,7 +2,7 @@ import { cart, deleteCart, updateCartQuantity } from '../data/cart.js'
 import * as payment from './payment.js';
 import { deliveryOptions  } from '../data/deliveryOptions.js';
 
-function renderOrderSummary() {
+export function renderOrderSummary() {
   document.querySelector('.js-cart-items').textContent = updateCartQuantity();
 
   const order_summary = document.querySelector('.order-summary')

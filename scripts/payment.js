@@ -1,5 +1,7 @@
 import * as cartItems from "../data/cart.js";
 import { deliveryOptions } from "../data/deliveryOptions.js"; 
+import { placeOrders } from "../data/orders.js";
+import { renderOrderSummary } from "./checkout.js";
 
 export function renderFeeSummary() {
   function cartPrice(){
@@ -64,4 +66,15 @@ export function renderFeeSummary() {
   `;
 
   document.querySelector('.payment-summary').innerHTML = display_payment;
+
+  document.querySelector('.place-order-button').addEventListener('click', e => {
+    console.log('Placed Order!');
+    setTimeout(() => {
+      placeOrders(cartItems.cart)
+      cartItems.deleteAllCart()
+      renderOrderSummary()
+    }, 1500)
+    // window.location.href = 'orders.html'
+  })
 }
+

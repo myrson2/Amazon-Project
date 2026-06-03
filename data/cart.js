@@ -31,6 +31,11 @@ export function deleteCart(productId) {
   saveStorage()
 }
 
+export function deleteAllCart() {
+   cart = []
+   saveStorage()
+}
+
 export function updateCartQuantity() {
     let total_cartquantity = 0
         cart.forEach(c => {
