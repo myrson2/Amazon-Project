@@ -31,7 +31,12 @@ export function deleteCart(productId) {
   localStorage.setItem('Cart', JSON.stringify(cart));
 }
 
-export function updateCartQuantity() {
+export function deleteAllCart() {
+  cart = [];
+  saveStorage();
+}
+
+export function returnQuantity() {
     let total_cartquantity = 0
         cart.forEach(c => {
             total_cartquantity += c.productQuantity

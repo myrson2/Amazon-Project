@@ -1,7 +1,7 @@
 import * as cartItems from "../data/cart.js";
 import { deliveryOptions } from "../data/deliveryOptions.js"; 
-import { placeOrders } from "../data/orders.js";
-import { renderOrderSummary } from "./checkout.js";
+import { placeOrders, renderOrderSummary } from "./orders.js";
+import { renderCheckoutSummary } from "./checkout.js";
 
 export function renderFeeSummary() {
   function cartPrice(){
@@ -36,7 +36,7 @@ export function renderFeeSummary() {
           </div>
 
           <div class="payment-summary-row">
-            <div>Items (${cartItems.updateCartQuantity()}):</div>
+            <div>Items (${cartItems.returnQuantity()}):</div>
             <div class="payment-summary-money">$${(cartPrice()/100).toFixed(2)}</div>
           </div>
 
@@ -70,11 +70,10 @@ export function renderFeeSummary() {
   document.querySelector('.place-order-button').addEventListener('click', e => {
     console.log('Placed Order!');
     setTimeout(() => {
-      placeOrders(cartItems.cart)
+      placeOrders(cartItems.cart, totalCents)
       cartItems.deleteAllCart()
       renderOrderSummary()
+      window.location.href = 'orders.html'
     }, 1500)
-    // window.location.href = 'orders.html'
   })
 }
-

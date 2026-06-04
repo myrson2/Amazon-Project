@@ -1,9 +1,9 @@
-import { cart, deleteCart, updateCartQuantity } from '../data/cart.js'
+import { cart, deleteCart, returnQuantity } from '../data/cart.js'
 import * as payment from './payment.js';
 import { deliveryOptions  } from '../data/deliveryOptions.js';
 
-export function renderOrderSummary() {
-  document.querySelector('.js-cart-items').textContent = updateCartQuantity();
+export function renderCheckoutSummary() {
+  document.querySelector('.js-cart-items').textContent = returnQuantity();
 
   const order_summary = document.querySelector('.order-summary')
   if (!order_summary) return;
@@ -131,8 +131,8 @@ document.querySelector('.order-summary').addEventListener('click', (e) => {
   if (e.target.classList.contains('delete-quantity-link')) {
     const productId = e.target.closest('.product-quantity').dataset.productId;
     deleteCart(productId);
-    renderOrderSummary();
+    renderCheckoutSummary();
   }
 });
 
-renderOrderSummary();
+renderCheckoutSummary();
