@@ -16,13 +16,14 @@ export const placeOrders = (cart, totalCostCents) => {
     products: [...cart] // Spread to create a shallow copy/snapshot
   };
 
-  orders.unshift(order); // Add newest order to the beginning
+  orders.push(order);
   saveOrders();
-  renderOrderSummary
 }
 
 export function renderOrderSummary() {
   const orderGrid = document.querySelector('.orders-grid')
+  if (!orderGrid) return;
+
   const cartQuantityElement = document.querySelector('.cart-quantity');
   if (cartQuantityElement) {
     cartQuantityElement.textContent = returnQuantity();
@@ -30,41 +31,48 @@ export function renderOrderSummary() {
 
   let display_order = ``
 
-  orders.forEach(order => {
+  const groupedOrders = Object.groupBy(orders, order => order.orderTime);
+
+  Object.entries(groupedOrders).forEach(([date, ordersOnThisDate]) => {
     let productsHTML = '';
+    let dayTotalCents = 0;
 
-    order.products.forEach(product => {
-      productsHTML += `
-        <div class="order-details">
-          <div class="product-image-container">
-            <img src="${product.productImage}">
-          </div>
+    ordersOnThisDate.forEach(order => {
+      dayTotalCents += order.totalCostCents;
 
-          <div class="product-details">
-            <div class="product-name">
-              ${product.productName}
+      order.products.forEach(product => {
+        productsHTML += `
+          <div class="order-details">
+            <div class="product-image-container">
+              <img src="${product.productImage}">
             </div>
-            <div class="product-delivery-date">
-              Arriving on: ${product.shippingDay}
-            </div>
-            <div class="product-quantity">
-              Quantity: ${product.productQuantity}
-            </div>
-            <button class="buy-again-button button-primary">
-              <img class="buy-again-icon" src="images/icons/buy-again.png">
-              <span class="buy-again-message">Buy it again</span>
-            </button>
-          </div>
 
-          <div class="product-actions">
-            <a href="tracking.html">
-              <button class="track-package-button button-secondary">
-                Track package
+            <div class="product-details">
+              <div class="product-name">
+                ${product.productName}
+              </div>
+              <div class="product-delivery-date">
+                Arriving on: ${product.shippingDay}
+              </div>
+              <div class="product-quantity">
+                Quantity: ${product.productQuantity}
+              </div>
+              <button class="buy-again-button button-primary">
+                <img class="buy-again-icon" src="images/icons/buy-again.png">
+                <span class="buy-again-message">Buy it again</span>
               </button>
-            </a>
+            </div>
+
+            <div class="product-actions">
+              <a href="tracking.html">
+                <button class="track-package-button button-secondary">
+                  Track package
+                </button>
+              </a>
+            </div>
           </div>
-        </div>
-      `;
+        `;
+      });
     });
 
     display_order += `
@@ -73,16 +81,16 @@ export function renderOrderSummary() {
             <div class="order-header-left-section">
               <div class="order-date">
                 <div class="order-header-label">Order Placed:</div>
-                <div>${order.orderTime}</div>
+                <div>${date}</div>
               </div>
               <div class="order-total">
                 <div class="order-header-label">Total:</div>
-                <div>$${(order.totalCostCents/100).toFixed(2)}</div>
+                <div>$${(dayTotalCents/100).toFixed(2)}</div>
               </div>
             </div>
             <div class="order-header-right-section">
-              <div class="order-header-label">Order ID:</div>
-              <div>${order.id}</div>
+              <div class="order-header-label">Group ID:</div>
+              <div>${ordersOnThisDate[0].id.slice(0, 8)}...</div>
             </div>
           </div>
 
@@ -95,3 +103,5 @@ export function renderOrderSummary() {
 
   orderGrid.innerHTML = display_order
 }
+
+renderOrderSummary()
