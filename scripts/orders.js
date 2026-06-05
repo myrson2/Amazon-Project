@@ -1,4 +1,5 @@
 import { cart, returnQuantity } from "../data/cart.js"; // Corrected and consolidated import
+import { renderTrackingPage } from "./tracking.js";
 
 export let orders = JSON.parse(localStorage.getItem('Orders')) || [];
 
@@ -9,8 +10,13 @@ function saveOrders() {
 export const placeOrders = (cart, totalCostCents) => {
   if (cart.length === 0) return;
 
+  // Fallback for crypto.randomUUID() which is undefined in insecure contexts like file://
+  const generatedId = (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') 
+    ? crypto.randomUUID() 
+    : 'order-' + Date.now() + '-' + Math.floor(Math.random() * 1000000);
+
   const order = {
-    id: crypto.randomUUID(),
+    id: generatedId,
     orderTime: new Date().toLocaleDateString(),
     totalCostCents: totalCostCents,
     products: [...cart] // Spread to create a shallow copy/snapshot
@@ -41,6 +47,8 @@ export function renderOrderSummary() {
       dayTotalCents += order.totalCostCents;
 
       order.products.forEach(product => {
+        const orderId = order.id || '';
+        const productId = product.productID || '';
         productsHTML += `
           <div class="order-details">
             <div class="product-image-container">
@@ -63,8 +71,8 @@ export function renderOrderSummary() {
               </button>
             </div>
 
-            <div class="product-actions">
-              <a href="tracking.html">
+            <div class="product-actions" data-order-id="${orderId}" data-product-id="${productId}">
+              <a href="tracking.html?orderId=${orderId}&productId=${productId}">
                 <button class="track-package-button button-secondary">
                   Track package
                 </button>
@@ -74,6 +82,8 @@ export function renderOrderSummary() {
         `;
       });
     });
+
+    const firstOrderId = (ordersOnThisDate[0] && ordersOnThisDate[0].id) ? ordersOnThisDate[0].id.slice(0, 8) : 'N/A';
 
     display_order += `
        <div class="order-container">
@@ -90,7 +100,7 @@ export function renderOrderSummary() {
             </div>
             <div class="order-header-right-section">
               <div class="order-header-label">Group ID:</div>
-              <div>${ordersOnThisDate[0].id.slice(0, 8)}...</div>
+              <div>${firstOrderId}...</div>
             </div>
           </div>
 
@@ -102,6 +112,23 @@ export function renderOrderSummary() {
   });
 
   orderGrid.innerHTML = display_order
+
+  document.querySelectorAll('.product-actions').forEach(actions => {
+    actions.addEventListener('click', e => {
+      // Find the closest anchor to allow natural navigation
+      const anchor = e.target.closest('a');
+      if (anchor) {
+        // Let the default link navigation go to tracking.html with query parameters
+        return;
+      }
+      const target = e.target.closest('.product-actions');
+      const order_id = target.dataset.orderId;
+      const product_id = target.dataset.productId;
+      renderTrackingPage(product_id);
+      console.log('Order ID:', order_id, 'Product ID:', product_id);
+    })
+  })
+
 }
 
 renderOrderSummary()
